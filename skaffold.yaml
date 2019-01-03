@@ -1,0 +1,31 @@
+apiVersion: skaffold/v1alpha2
+kind: Config
+build:
+  tagPolicy:
+    envTemplate:
+      template: "{{.DOCKER_REGISTRY}}/witchlove/spring-boot-microservice-forex-service:{{.VERSION}}"
+  artifacts:
+  - imageName: changeme
+    workspace: .
+    docker: {}
+  local: {}
+deploy:
+  kubectl:
+    manifests:
+profiles:
+- name: dev
+  build:
+    tagPolicy:
+      envTemplate:
+        template: "{{.DOCKER_REGISTRY}}/witchlove/spring-boot-microservice-forex-service:{{.DIGEST_HEX}}"
+    artifacts:
+    - docker: {}
+    local: {}
+  deploy:
+    helm:
+      releases:
+      - name: spring-boot-microservice-forex-service
+        chartPath: charts/spring-boot-microservice-forex-service
+        setValueTemplates:
+          image.repository: "{{.DOCKER_REGISTRY}}/witchlove/spring-boot-microservice-forex-service"
+          image.tag: "{{.DIGEST_HEX}}"
